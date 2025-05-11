@@ -48,13 +48,14 @@ const constructRequestPath = (path: string) => {
   return path;
 };
 
-export const get = async (
+const makeRequest = async (
+  method: string,
   path: string,
+  data?: any,
   leaveOpen?: boolean,
-): Promise<Metadata> => {
+): Promise<any> => {
   const socketPath = "/var/lib/incus/unix.socket";
   const requestPath = constructRequestPath(path);
-  // remove trailing slash
 
   console.log("requestPath", requestPath);
   console.log("socketPath", socketPath);
@@ -71,13 +72,25 @@ export const get = async (
     const enc = new TextEncoder();
     const dec = new TextDecoder();
 
-    // Build an ordinary HTTP/1.1 request
-    const httpRequest = `GET ${requestPath} HTTP/1.1\r\n` +
-      `Host: incus\r\n` +
-      `User-Agent: deno-unix-socket/1.0\r\n` +
-      `Accept: */*\r\n` +
-      `Connection: close\r\n` +
-      `\r\n`;
+    const headers = [
+      `Host: incus`,
+      `User-Agent: deno-unix-socket/1.0`,
+      `Accept: */*`,
+      `Connection: close`,
+    ];
+
+    let body = "";
+    if (data !== undefined) {
+      body = JSON.stringify(data);
+      headers.push(
+        `Content-Type: application/json`,
+        `Content-Length: ${body.length}`,
+      );
+    }
+
+    const httpRequest = `${method} ${requestPath} HTTP/1.1\r\n` +
+      headers.join("\r\n") + "\r\n\r\n" +
+      body;
 
     await conn.write(enc.encode(httpRequest));
 
@@ -90,16 +103,16 @@ export const get = async (
     }
 
     // Parse HTTP response
-    const [headers, ...bodyParts] = response.split("\r\n\r\n");
+    const [responseHeaders, ...bodyParts] = response.split("\r\n\r\n");
     if (!bodyParts.length) {
       throw new Error("Invalid HTTP response: missing body");
     }
 
     // Handle chunked transfer encoding
-    let body = bodyParts.join("\r\n\r\n");
-    if (headers.includes("Transfer-Encoding: chunked")) {
+    let responseBody = bodyParts.join("\r\n\r\n");
+    if (responseHeaders.includes("Transfer-Encoding: chunked")) {
       const chunks: string[] = [];
-      let remaining = body;
+      let remaining = responseBody;
 
       while (remaining.length > 0) {
         // Find the chunk size line
@@ -120,104 +133,16 @@ export const get = async (
         remaining = remaining.substring(chunkEnd + 2);
       }
 
-      body = chunks.join("");
+      responseBody = chunks.join("");
     }
 
-    const ir = JSON.parse(body) as IncusResponse;
+    console.log("body", responseBody);
 
-    if (ir.error) {
-      throw new Error(JSON.stringify({ error: ir.error, response }));
+    const parsed = JSON.parse(responseBody);
+    if (method === "GET" && parsed.error) {
+      throw new Error(JSON.stringify({ error: parsed.error, response }));
     }
-
-    return ir.metadata;
-  } catch (e) {
-    throw new Error(JSON.stringify({ e, response }));
-  } finally {
-    if (conn && !leaveOpen) {
-      conn.close();
-    }
-  }
-};
-
-export const post = async (path: string, data: any, leaveOpen?: boolean) => {
-  const socketPath = "/var/lib/incus/unix.socket";
-  const requestPath = constructRequestPath(path);
-
-  console.log("requestPath", requestPath);
-  console.log("socketPath", socketPath);
-
-  let conn: Deno.Conn | null = null;
-  let response = "";
-
-  try {
-    conn = await Deno.connect({
-      transport: "unix",
-      path: socketPath,
-    });
-
-    const enc = new TextEncoder();
-    const dec = new TextDecoder();
-
-    data = JSON.stringify(data);
-
-    // Build an ordinary HTTP/1.1 request
-    const httpRequest = `POST ${requestPath} HTTP/1.1\r\n` +
-      `Host: incus\r\n` +
-      `User-Agent: deno-unix-socket/1.0\r\n` +
-      `Accept: */*\r\n` +
-      `Connection: close\r\n` +
-      `Content-Type: application/json\r\n` +
-      `Content-Length: ${data.length}\r\n` +
-      `\r\n` +
-      data;
-
-    await conn.write(enc.encode(httpRequest));
-
-    // Collect the whole response
-    const buf = new Uint8Array(16_384);
-    for (;;) {
-      const n = await conn.read(buf);
-      if (n === null) break;
-      response += dec.decode(buf.subarray(0, n));
-    }
-
-    // Parse HTTP response
-    const [headers, ...bodyParts] = response.split("\r\n\r\n");
-    if (!bodyParts.length) {
-      throw new Error("Invalid HTTP response: missing body");
-    }
-
-    // Handle chunked transfer encoding
-    let body = bodyParts.join("\r\n\r\n");
-    if (headers.includes("Transfer-Encoding: chunked")) {
-      const chunks: string[] = [];
-      let remaining = body;
-
-      while (remaining.length > 0) {
-        // Find the chunk size line
-        const chunkSizeEnd = remaining.indexOf("\r\n");
-        if (chunkSizeEnd === -1) break;
-
-        const chunkSizeHex = remaining.substring(0, chunkSizeEnd);
-        const chunkSize = parseInt(chunkSizeHex, 16);
-
-        // Skip the chunk size line and get the chunk data
-        const chunkStart = chunkSizeEnd + 2;
-        const chunkEnd = chunkStart + chunkSize;
-        const chunk = remaining.substring(chunkStart, chunkEnd);
-
-        chunks.push(chunk);
-
-        // Move to next chunk (skip chunk data and \r\n)
-        remaining = remaining.substring(chunkEnd + 2);
-      }
-
-      body = chunks.join("");
-    }
-
-    console.log("body", body);
-
-    return JSON.parse(body);
+    return parsed;
   } catch (e) {
     console.error(e);
     return { error: e, response };
@@ -228,180 +153,14 @@ export const post = async (path: string, data: any, leaveOpen?: boolean) => {
   }
 };
 
-export const patch = async (path: string, data: any, leaveOpen?: boolean) => {
-  const socketPath = "/var/lib/incus/unix.socket";
-  const requestPath = constructRequestPath(path);
+export const get = async (path: string, leaveOpen?: boolean) =>
+  (await makeRequest("GET", path, undefined, leaveOpen)).metadata;
 
-  console.log("requestPath", requestPath);
-  console.log("socketPath", socketPath);
+export const post = (path: string, data: any, leaveOpen?: boolean) =>
+  makeRequest("POST", path, data, leaveOpen);
 
-  let conn: Deno.Conn | null = null;
-  let response = "";
+export const patch = (path: string, data: any, leaveOpen?: boolean) =>
+  makeRequest("PATCH", path, data, leaveOpen);
 
-  try {
-    conn = await Deno.connect({
-      transport: "unix",
-      path: socketPath,
-    });
-
-    const enc = new TextEncoder();
-    const dec = new TextDecoder();
-
-    data = JSON.stringify(data);
-
-    // Build an ordinary HTTP/1.1 request
-    const httpRequest = `PATCH ${requestPath} HTTP/1.1\r\n` +
-      `Host: incus\r\n` +
-      `User-Agent: deno-unix-socket/1.0\r\n` +
-      `Accept: */*\r\n` +
-      `Connection: close\r\n` +
-      `Content-Type: application/json\r\n` +
-      `Content-Length: ${data.length}\r\n` +
-      `\r\n` +
-      data;
-
-    await conn.write(enc.encode(httpRequest));
-
-    // Collect the whole response
-    const buf = new Uint8Array(16_384);
-    for (;;) {
-      const n = await conn.read(buf);
-      if (n === null) break;
-      response += dec.decode(buf.subarray(0, n));
-    }
-
-    // Parse HTTP response
-    const [headers, ...bodyParts] = response.split("\r\n\r\n");
-    if (!bodyParts.length) {
-      throw new Error("Invalid HTTP response: missing body");
-    }
-
-    // Handle chunked transfer encoding
-    let body = bodyParts.join("\r\n\r\n");
-    if (headers.includes("Transfer-Encoding: chunked")) {
-      const chunks: string[] = [];
-      let remaining = body;
-
-      while (remaining.length > 0) {
-        // Find the chunk size line
-        const chunkSizeEnd = remaining.indexOf("\r\n");
-        if (chunkSizeEnd === -1) break;
-
-        const chunkSizeHex = remaining.substring(0, chunkSizeEnd);
-        const chunkSize = parseInt(chunkSizeHex, 16);
-
-        // Skip the chunk size line and get the chunk data
-        const chunkStart = chunkSizeEnd + 2;
-        const chunkEnd = chunkStart + chunkSize;
-        const chunk = remaining.substring(chunkStart, chunkEnd);
-
-        chunks.push(chunk);
-
-        // Move to next chunk (skip chunk data and \r\n)
-        remaining = remaining.substring(chunkEnd + 2);
-      }
-
-      body = chunks.join("");
-    }
-
-    console.log("body", body);
-
-    return JSON.parse(body);
-  } catch (e) {
-    console.error(e);
-    return { error: e, response };
-  } finally {
-    if (conn && !leaveOpen) {
-      conn.close();
-    }
-  }
-};
-
-export const del = async (path: string, data: any, leaveOpen?: boolean) => {
-  const socketPath = "/var/lib/incus/unix.socket";
-  const requestPath = constructRequestPath(path);
-
-  console.log("requestPath", requestPath);
-  console.log("socketPath", socketPath);
-
-  let conn: Deno.Conn | null = null;
-  let response = "";
-
-  try {
-    conn = await Deno.connect({
-      transport: "unix",
-      path: socketPath,
-    });
-
-    const enc = new TextEncoder();
-    const dec = new TextDecoder();
-
-    data = JSON.stringify(data ?? {});
-
-    // Build an ordinary HTTP/1.1 request
-    const httpRequest = `PATCH ${requestPath} HTTP/1.1\r\n` +
-      `Host: incus\r\n` +
-      `User-Agent: deno-unix-socket/1.0\r\n` +
-      `Accept: */*\r\n` +
-      `Connection: close\r\n` +
-      `Content-Type: application/json\r\n` +
-      `Content-Length: ${data.length}\r\n` +
-      `\r\n` +
-      data;
-
-    await conn.write(enc.encode(httpRequest));
-
-    // Collect the whole response
-    const buf = new Uint8Array(16_384);
-    for (;;) {
-      const n = await conn.read(buf);
-      if (n === null) break;
-      response += dec.decode(buf.subarray(0, n));
-    }
-
-    // Parse HTTP response
-    const [headers, ...bodyParts] = response.split("\r\n\r\n");
-    if (!bodyParts.length) {
-      throw new Error("Invalid HTTP response: missing body");
-    }
-
-    // Handle chunked transfer encoding
-    let body = bodyParts.join("\r\n\r\n");
-    if (headers.includes("Transfer-Encoding: chunked")) {
-      const chunks: string[] = [];
-      let remaining = body;
-
-      while (remaining.length > 0) {
-        // Find the chunk size line
-        const chunkSizeEnd = remaining.indexOf("\r\n");
-        if (chunkSizeEnd === -1) break;
-
-        const chunkSizeHex = remaining.substring(0, chunkSizeEnd);
-        const chunkSize = parseInt(chunkSizeHex, 16);
-
-        // Skip the chunk size line and get the chunk data
-        const chunkStart = chunkSizeEnd + 2;
-        const chunkEnd = chunkStart + chunkSize;
-        const chunk = remaining.substring(chunkStart, chunkEnd);
-
-        chunks.push(chunk);
-
-        // Move to next chunk (skip chunk data and \r\n)
-        remaining = remaining.substring(chunkEnd + 2);
-      }
-
-      body = chunks.join("");
-    }
-
-    console.log("body", body);
-
-    return JSON.parse(body);
-  } catch (e) {
-    console.error(e);
-    return { error: e, response };
-  } finally {
-    if (conn && !leaveOpen) {
-      conn.close();
-    }
-  }
-};
+export const del = (path: string, data: any, leaveOpen?: boolean) =>
+  makeRequest("DELETE", path, data, leaveOpen);
