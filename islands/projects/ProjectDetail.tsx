@@ -1,7 +1,7 @@
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { type Project } from "@/incus.ts";
-
+import ProjectInstances from "./Instances.tsx";
 export default function ProjectDetail(
   { id, onDeleted }: { id: string; onDeleted: () => void },
 ) {
@@ -38,6 +38,7 @@ export default function ProjectDetail(
           ),
         )}
       </dl>
+      <ProjectInstances name={selectedDetail.value.name} />
     </div>
   );
 }
