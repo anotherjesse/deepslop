@@ -1,14 +1,26 @@
 export * from "./incus.d.ts";
 
-import type { Image, Instance, Network, Profile, Project } from "./incus.d.ts";
+import type {
+  Image,
+  Instance,
+  Network,
+  Profile,
+  Project,
+  Server,
+} from "./incus.d.ts";
 
-export type Metadata = Image | Instance | Network | Project | Profile;
+export type Metadata = Image | Instance | Network | Project | Profile | Server;
 
-export const getImage = (id: string) => get(`/images/${id}`) as Image;
-export const getInstance = (id: string) => get(`/instances/${id}`) as Instance;
-export const getNetwork = (id: string) => get(`/networks/${id}`) as Network;
-export const getProject = (id: string) => get(`/projects/${id}`) as Project;
-export const getProfile = (id: string) => get(`/profiles/${id}`) as Profile;
+export const getImage = (id: string) => get(`/images/${id}`) as Promise<Image>;
+export const getInstance = (id: string) =>
+  get(`/instances/${id}`) as Promise<Instance>;
+export const getNetwork = (id: string) =>
+  get(`/networks/${id}`) as Promise<Network>;
+export const getProject = (id: string) =>
+  get(`/projects/${id}`) as Promise<Project>;
+export const getProfile = (id: string) =>
+  get(`/profiles/${id}`) as Promise<Profile>;
+export const getServer = () => get("/") as Promise<Server>;
 
 export type IncusResponse = {
   type: "sync";
@@ -25,7 +37,8 @@ export const get = async (
   leaveOpen?: boolean,
 ): Promise<Metadata> => {
   const socketPath = "/var/lib/incus/unix.socket";
-  const requestPath = `/1.0${path}`;
+  // remove trailing slash
+  const requestPath = `/1.0${path.endsWith("/") ? path.slice(0, -1) : path}`;
 
   console.log("requestPath", requestPath);
   console.log("socketPath", socketPath);

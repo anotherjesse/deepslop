@@ -1,18 +1,6 @@
 import { FreshContext } from "$fresh/server.ts";
-import { get } from "../../../incus.ts";
+import { getNetwork } from "../../../incus.ts";
+import { jsonToResponse } from "../../../helpers.ts";
 
-export const handler = async (
-  _req: Request,
-  _ctx: FreshContext,
-): Promise<Response> => {
-  const name = _req.url.split("/").pop()?.split("?")[0];
-  if (!name) {
-    return new Response("No name provided", { status: 400 });
-  }
-  const body = await get(`/networks/${name}`);
-  return new Response(JSON.stringify(body), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
+export const handler = async (_: Request, c: FreshContext) =>
+  jsonToResponse(await getNetwork(c.params.name));

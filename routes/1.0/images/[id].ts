@@ -1,14 +1,6 @@
 import { FreshContext } from "$fresh/server.ts";
-import { get, Image } from "../../../incus.ts";
+import { getImage } from "../../../incus.ts";
+import { jsonToResponse } from "../../../helpers.ts";
 
-export const handler = async (
-  _: Request,
-  c: FreshContext,
-): Promise<Response> => {
-  const img = await get(`/images/${c.params.id}`) as Image;
-  return new Response(JSON.stringify(img, null, 2), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
+export const handler = async (_: Request, c: FreshContext) =>
+  jsonToResponse(await getImage(c.params.id));

@@ -1,14 +1,6 @@
 import { FreshContext } from "$fresh/server.ts";
 import { get } from "../../../incus.ts";
+import { jsonToResponse } from "../../../helpers.ts";
 
-export const handler = async (
-  _req: Request,
-  _ctx: FreshContext,
-): Promise<Response> => {
-  const body = await get("/profiles");
-  return new Response(JSON.stringify(body), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-};
+export const handler = async (_r: Request, _c: FreshContext) =>
+  jsonToResponse(await get("/profiles"));
