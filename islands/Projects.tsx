@@ -1,4 +1,3 @@
-/** islands/InstancesIsland.tsx */
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { type Project } from "../incus.ts";
@@ -53,7 +52,12 @@ export default function ProjectsIsland() {
     <div class="flex gap-8 py-6">
       <ul>
         <li>
-          <a onClick={() => createProject.value = true}>Create Project</a>
+          <button
+            type="button"
+            onClick={() => createProject.value = true}
+          >
+            Create Project
+          </button>
         </li>
         {projects.value.map((name) => (
           <li
@@ -70,6 +74,7 @@ export default function ProjectsIsland() {
         <div class="border-l pl-8">
           <h2 class="text-xl font-bold mb-4">{selectedDetail.value.name}</h2>
           <button
+            type="button"
             onClick={() => {
               if (!selectedId.value) return;
               if (
@@ -103,7 +108,6 @@ export default function ProjectsIsland() {
 
       {createProject.value && (
         <div class="border-l pl-8">
-          <h2>Create Project</h2>
           <form onSubmit={createProjectPost}>
             <label class="flex flex-col gap-2">
               Name

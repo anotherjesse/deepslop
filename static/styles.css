@@ -9,3 +9,7 @@
   font-style: normal;
   font-variation-settings: "BLED" 0, "SCAN" 0;
 }
+
+button {
+  @apply border-2 border-gray-300 rounded-md p-2;
+}
