@@ -5,10 +5,8 @@
 import * as $_1_0_path_ from "./routes/1.0/[...path].ts";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
-import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
 import * as $projects from "./routes/projects.tsx";
-import * as $Counter from "./islands/Counter.tsx";
 import * as $Instances from "./islands/Instances.tsx";
 import * as $Projects from "./islands/Projects.tsx";
 import * as $Server from "./islands/Server.tsx";
@@ -19,12 +17,10 @@ const manifest = {
     "./routes/1.0/[...path].ts": $_1_0_path_,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
-    "./routes/greet/[name].tsx": $greet_name_,
     "./routes/index.tsx": $index,
     "./routes/projects.tsx": $projects,
   },
   islands: {
-    "./islands/Counter.tsx": $Counter,
     "./islands/Instances.tsx": $Instances,
     "./islands/Projects.tsx": $Projects,
     "./islands/Server.tsx": $Server,

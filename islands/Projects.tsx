@@ -9,16 +9,15 @@ export default function ProjectsIsland() {
   const selectedDetail = useSignal<Project | null>(null); // fetched details
   const createProject = useSignal<boolean>(false); // create project
 
-  useEffect(
-    () => {
-      fetch("/1.0/projects")
-        .then((r) => r.json())
-        .then((links) => {
-          projects.value = links;
-        });
-    },
-    [],
-  );
+  const refreshProjects = () => {
+    fetch("/1.0/projects")
+      .then((r) => r.json())
+      .then((links) => {
+        projects.value = links;
+      });
+  };
+
+  useEffect(refreshProjects, []);
 
   useEffect(() => {
     if (!selectedId.value) {
@@ -37,19 +36,14 @@ export default function ProjectsIsland() {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const name = form.name.value;
+    const github = form.github.value;
     fetch("/1.0/projects", {
       method: "POST",
       body: JSON.stringify({
         name,
-        config: { "user.github": "https://github.com/anotherjesse" },
+        config: { "user.github": github },
       }),
-    }).then((r) => r.json()).then((data) => {
-      fetch("/1.0/projects")
-        .then((r) => r.json())
-        .then((links) => {
-          projects.value = links;
-        });
-    });
+    }).then((r) => r.json()).then(refreshProjects);
     createProject.value = false;
   };
 
@@ -101,28 +95,6 @@ export default function ProjectsIsland() {
                 <tr>
                   <td>{key}</td>
                   <td>{value}</td>
-                  <td
-                    onClick={() => {
-                      if (!selectedId.value) return;
-                      fetch(selectedId.value, {
-                        method: "PATCH",
-                        body: JSON.stringify({
-                          config: {
-                            [key]: null,
-                          },
-                        }),
-                      }).then((r) => r.json()).then((data) => {
-                        if (!selectedId.value) return;
-                        fetch(selectedId.value).then((r) => r.json()).then(
-                          (data) => {
-                            selectedDetail.value = data;
-                          },
-                        );
-                      });
-                    }}
-                  >
-                    Delete
-                  </td>
                 </tr>
               ),
             )}
@@ -134,12 +106,23 @@ export default function ProjectsIsland() {
         <div class="border-l pl-8">
           <h2>Create Project</h2>
           <form onSubmit={createProjectPost}>
-            <input
-              type="text"
-              name="name"
-              autofocus
-              class="border-2 border-gray-300 rounded-md p-2"
-            />
+            <label class="flex flex-col gap-2">
+              Name
+              <input
+                type="text"
+                name="name"
+                autofocus
+                class="border-2 border-gray-300 rounded-md p-2"
+              />
+            </label>
+            <label>
+              Github
+              <input
+                type="text"
+                name="github"
+                class="border-2 border-gray-300 rounded-md p-2"
+              />
+            </label>
             <button type="submit">Create</button>
           </form>
         </div>
