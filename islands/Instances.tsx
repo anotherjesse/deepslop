@@ -4,16 +4,10 @@ import { useEffect } from "preact/hooks";
 import { type Instance } from "../incus.ts";
 
 export default function InstancesIsland() {
-  /* ------------------------------------------------------------------ */
-  /* signals                                                             */
-  /* ------------------------------------------------------------------ */
   const instances = useSignal<string[]>([]); // list of names
   const selectedId = useSignal<string | null>(null); // the clicked name
   const selectedDetail = useSignal<Instance | null>(null); // fetched details
 
-  /* ------------------------------------------------------------------ */
-  /* fetch all instances once                                            */
-  /* ------------------------------------------------------------------ */
   useEffect(
     () => {
       fetch("/1.0/instances")
@@ -25,9 +19,6 @@ export default function InstancesIsland() {
     [],
   );
 
-  /* ------------------------------------------------------------------ */
-  /* when the id changes, fetch its detail                              */
-  /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!selectedId.value) {
       selectedDetail.value = null;
@@ -39,9 +30,6 @@ export default function InstancesIsland() {
     });
   }, [selectedId.value]);
 
-  /* ------------------------------------------------------------------ */
-  /* render                                                              */
-  /* ------------------------------------------------------------------ */
   if (!instances.value.length) return <p>Loading…</p>;
 
   return (

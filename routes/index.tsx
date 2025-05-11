@@ -1,4 +1,3 @@
-import ServerIsland from "../islands/Server.tsx";
 import InstancesIsland from "../islands/Instances.tsx";
 
 export default function Home() {
