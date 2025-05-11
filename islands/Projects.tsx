@@ -8,28 +8,30 @@ export default function ProjectsIsland() {
   const selectedDetail = useSignal<Project | null>(null); // fetched details
   const createProject = useSignal<boolean>(false); // create project
 
-  const refreshProjects = () => {
+  const refreshProjects = (clearSelected?: any) => {
     fetch("/1.0/projects")
       .then((r) => r.json())
       .then((links) => {
         projects.value = links;
       });
-    selectedId.value = null;
-    selectedDetail.value = null;
+    if (clearSelected) {
+      selectedId.value = null;
+      selectedDetail.value = null;
+    }
+  };
+
+  const refreshProject = (name: string | null) => {
+    if (name) {
+      fetch(name).then((r) => r.json()).then((data) => {
+        selectedDetail.value = data;
+      });
+    } else {
+      selectedDetail.value = null;
+    }
   };
 
   useEffect(refreshProjects, []);
-
-  useEffect(() => {
-    if (!selectedId.value) {
-      selectedDetail.value = null;
-      return;
-    }
-
-    fetch(selectedId.value).then((r) => r.json()).then((data) => {
-      selectedDetail.value = data;
-    });
-  }, [selectedId.value]);
+  useEffect(() => refreshProject(selectedId.value), [selectedId.value]);
 
   if (!projects.value.length) return <p>Loading…</p>;
 
@@ -77,18 +79,9 @@ export default function ProjectsIsland() {
             type="button"
             onClick={() => {
               if (!selectedId.value) return;
-              if (
-                !confirm("Are you sure you want to delete this project?")
-              ) return;
-              fetch(selectedId.value, {
-                method: "DELETE",
-              }).then(
-                (r) => {
-                  if (r.ok) {
-                    refreshProjects();
-                  }
-                },
-              );
+              if (!confirm("Really delete this project?")) return;
+              fetch(selectedId.value, { method: "DELETE" })
+                .then((r) => r.ok && refreshProjects(true));
             }}
           >
             delete
