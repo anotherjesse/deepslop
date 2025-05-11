@@ -15,6 +15,8 @@ export default function ProjectsIsland() {
       .then((links) => {
         projects.value = links;
       });
+    selectedId.value = null;
+    selectedDetail.value = null;
   };
 
   useEffect(refreshProjects, []);
@@ -70,18 +72,15 @@ export default function ProjectsIsland() {
           <button
             onClick={() => {
               if (!selectedId.value) return;
+              if (
+                !confirm("Are you sure you want to delete this project?")
+              ) return;
               fetch(selectedId.value, {
                 method: "DELETE",
               }).then(
                 (r) => {
                   if (r.ok) {
-                    fetch("/1.0/projects")
-                      .then((r) => r.json())
-                      .then((links) => {
-                        projects.value = links;
-                      });
-                    selectedId.value = null;
-                    selectedDetail.value = null;
+                    refreshProjects();
                   }
                 },
               );
@@ -115,7 +114,7 @@ export default function ProjectsIsland() {
                 class="border-2 border-gray-300 rounded-md p-2"
               />
             </label>
-            <label>
+            <label class="flex flex-col gap-2">
               Github
               <input
                 type="text"
