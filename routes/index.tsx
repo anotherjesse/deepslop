@@ -1,14 +1,10 @@
-import InstancesIsland from "../islands/Instances.tsx";
+import ProjectsIsland from "../islands/Projects.tsx";
 
 export default function Home() {
   return (
-    <div class="px-4 py-8 mx-auto ">
-      <div class="max-w-screen-md mx-auto flex flex-col items-center justify-center">
-        <h1 class="text-4xl font-bold">
-          Deep Slop
-        </h1>
-      </div>
-      <InstancesIsland />
+    <div class="px-4 py-8 mx-auto">
+      <h1 class="heading">deepslop.com</h1>
+      <ProjectsIsland />
     </div>
   );
 }
