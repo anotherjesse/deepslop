@@ -6,10 +6,11 @@ import * as $_1_0_path_ from "./routes/1.0/[...path].ts";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $index from "./routes/index.tsx";
-import * as $projects from "./routes/projects.tsx";
 import * as $Instances from "./islands/Instances.tsx";
-import * as $Projects from "./islands/Projects.tsx";
 import * as $Server from "./islands/Server.tsx";
+import * as $projects_Create from "./islands/projects/Create.tsx";
+import * as $projects_List from "./islands/projects/List.tsx";
+import * as $projects_ProjectDetail from "./islands/projects/ProjectDetail.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -18,12 +19,13 @@ const manifest = {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/index.tsx": $index,
-    "./routes/projects.tsx": $projects,
   },
   islands: {
     "./islands/Instances.tsx": $Instances,
-    "./islands/Projects.tsx": $Projects,
     "./islands/Server.tsx": $Server,
+    "./islands/projects/Create.tsx": $projects_Create,
+    "./islands/projects/List.tsx": $projects_List,
+    "./islands/projects/ProjectDetail.tsx": $projects_ProjectDetail,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

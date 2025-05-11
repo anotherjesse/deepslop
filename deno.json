@@ -21,6 +21,7 @@
     "**/_fresh/*"
   ],
   "imports": {
+    "@/": "./",
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
     "@xterm/headless": "npm:@xterm/headless@^5.5.0",
     "preact": "https://esm.sh/preact@10.22.0",

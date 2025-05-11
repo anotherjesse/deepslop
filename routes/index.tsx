@@ -1,4 +1,4 @@
-import ProjectsIsland from "../islands/Projects.tsx";
+import ProjectsIsland from "@/islands/projects/List.tsx";
 
 export default function Home() {
   return (

@@ -1,7 +1,7 @@
 /** islands/InstancesIsland.tsx */
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { type Instance } from "../incus.ts";
+import { type Instance } from "@/incus.ts";
 
 export default function InstancesIsland() {
   const instances = useSignal<string[]>([]); // list of names

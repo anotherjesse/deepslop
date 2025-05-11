@@ -1,6 +1,6 @@
 import { FreshContext } from "$fresh/server.ts";
-import { del, get, patch, post } from "../../incus.ts";
-import { jsonToResponse } from "../../helpers.ts";
+import { del, get, patch, post } from "@/incus.ts";
+import { jsonToResponse } from "@/helpers.ts";
 
 export const handler = async (r: Request, c: FreshContext) => {
   if (r.method === "GET") {

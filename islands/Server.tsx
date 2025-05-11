@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { type Server } from "../incus.ts";
+import { type Server } from "@/incus.ts";
 
 export default function ServerIsland() {
   const server = useSignal<Server | null>(null);
