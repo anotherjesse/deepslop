@@ -18,6 +18,8 @@ import * as $_app from "./routes/_app.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
 import * as $Counter from "./islands/Counter.tsx";
+import * as $Instances from "./islands/Instances.tsx";
+import * as $Server from "./islands/Server.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -40,6 +42,8 @@ const manifest = {
   },
   islands: {
     "./islands/Counter.tsx": $Counter,
+    "./islands/Instances.tsx": $Instances,
+    "./islands/Server.tsx": $Server,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

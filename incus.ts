@@ -6,6 +6,7 @@ import type {
   Network,
   Profile,
   Project,
+  ProjectsPost,
   Server,
 } from "./incus.d.ts";
 
@@ -16,8 +17,10 @@ export const getInstance = (id: string) =>
   get(`/instances/${id}`) as Promise<Instance>;
 export const getNetwork = (id: string) =>
   get(`/networks/${id}`) as Promise<Network>;
-export const getProject = (id: string) =>
-  get(`/projects/${id}`) as Promise<Project>;
+export const getProject = (name: string) =>
+  get(`/projects/${name}`) as Promise<Project>;
+export const createProject = (params: ProjectsPost) =>
+  post(`/projects`, params) as Promise<Project>;
 export const getProfile = (id: string) =>
   get(`/profiles/${id}`) as Promise<Profile>;
 export const getServer = () => get("/") as Promise<Server>;
