@@ -2,17 +2,7 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $_1_0_images_id_ from "./routes/1.0/images/[id].ts";
-import * as $_1_0_images_index from "./routes/1.0/images/index.ts";
-import * as $_1_0_index from "./routes/1.0/index.ts";
-import * as $_1_0_instances_name_ from "./routes/1.0/instances/[name].ts";
-import * as $_1_0_instances_index from "./routes/1.0/instances/index.ts";
-import * as $_1_0_networks_name_ from "./routes/1.0/networks/[name].ts";
-import * as $_1_0_networks_index from "./routes/1.0/networks/index.ts";
-import * as $_1_0_profiles_name_ from "./routes/1.0/profiles/[name].ts";
-import * as $_1_0_profiles_index from "./routes/1.0/profiles/index.ts";
-import * as $_1_0_projects_name_ from "./routes/1.0/projects/[name].ts";
-import * as $_1_0_projects_index from "./routes/1.0/projects/index.ts";
+import * as $_1_0_path_ from "./routes/1.0/[...path].ts";
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
@@ -26,17 +16,7 @@ import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
-    "./routes/1.0/images/[id].ts": $_1_0_images_id_,
-    "./routes/1.0/images/index.ts": $_1_0_images_index,
-    "./routes/1.0/index.ts": $_1_0_index,
-    "./routes/1.0/instances/[name].ts": $_1_0_instances_name_,
-    "./routes/1.0/instances/index.ts": $_1_0_instances_index,
-    "./routes/1.0/networks/[name].ts": $_1_0_networks_name_,
-    "./routes/1.0/networks/index.ts": $_1_0_networks_index,
-    "./routes/1.0/profiles/[name].ts": $_1_0_profiles_name_,
-    "./routes/1.0/profiles/index.ts": $_1_0_profiles_index,
-    "./routes/1.0/projects/[name].ts": $_1_0_projects_name_,
-    "./routes/1.0/projects/index.ts": $_1_0_projects_index,
+    "./routes/1.0/[...path].ts": $_1_0_path_,
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/greet/[name].tsx": $greet_name_,

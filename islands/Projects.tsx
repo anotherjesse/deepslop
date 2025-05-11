@@ -39,7 +39,10 @@ export default function ProjectsIsland() {
     const name = form.name.value;
     fetch("/1.0/projects", {
       method: "POST",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({
+        name,
+        config: { "user.github": "https://github.com/anotherjesse" },
+      }),
     }).then((r) => r.json()).then((data) => {
       fetch("/1.0/projects")
         .then((r) => r.json())
@@ -69,8 +72,61 @@ export default function ProjectsIsland() {
 
       {selectedDetail.value && (
         <div class="border-l pl-8">
-          <h2 class="text-xl font-bold mb-4">Project details</h2>
-          <pre>{JSON.stringify(selectedDetail.value, null, 2)}</pre>
+          <h2 class="text-xl font-bold mb-4">{selectedDetail.value.name}</h2>
+          <button
+            onClick={() => {
+              if (!selectedId.value) return;
+              fetch(selectedId.value, {
+                method: "DELETE",
+              }).then(
+                (r) => {
+                  if (r.ok) {
+                    fetch("/1.0/projects")
+                      .then((r) => r.json())
+                      .then((links) => {
+                        projects.value = links;
+                      });
+                    selectedId.value = null;
+                    selectedDetail.value = null;
+                  }
+                },
+              );
+            }}
+          >
+            delete
+          </button>
+          <table>
+            {Object.entries(selectedDetail.value.config ?? {}).map(
+              ([key, value]) => (
+                <tr>
+                  <td>{key}</td>
+                  <td>{value}</td>
+                  <td
+                    onClick={() => {
+                      if (!selectedId.value) return;
+                      fetch(selectedId.value, {
+                        method: "PATCH",
+                        body: JSON.stringify({
+                          config: {
+                            [key]: null,
+                          },
+                        }),
+                      }).then((r) => r.json()).then((data) => {
+                        if (!selectedId.value) return;
+                        fetch(selectedId.value).then((r) => r.json()).then(
+                          (data) => {
+                            selectedDetail.value = data;
+                          },
+                        );
+                      });
+                    }}
+                  >
+                    Delete
+                  </td>
+                </tr>
+              ),
+            )}
+          </table>
         </div>
       )}
 
